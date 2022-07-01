@@ -13,11 +13,7 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogWarning("Sending strudtured log from sender worker", new WorkerLogContainer()
-            {
-                Person = new Person("test", "test", "job test"),
-                Grade = new Grade("Good", 15)
-            });
+            _logger.LogWarning("Sending strudtured log from sender worker", new WorkerLogContainer(new Person("test", "test", "job test"), new Grade("Good", 15)));
 
             await Task.Delay(1000, stoppingToken);
         }
