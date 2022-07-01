@@ -25,16 +25,4 @@ public static class Extensions
         loggerConfiguration
         .MinimumLevel.Verbose().WriteTo.FluentdWithTCP("127.0.0.1", 24225, "UnTagged");
     };
-
-    public static long ToEpochTime(this DateTimeOffset offset)
-    {
-        var utcDate = offset.ToUniversalTime();
-        long baseTicks = 621355968000000000;
-        long tickResolution = 10000000;
-        long epoch = (utcDate.Ticks - baseTicks) / tickResolution;
-        long epochTicks = (epoch * tickResolution) + baseTicks;
-        var date = new DateTime(epochTicks, DateTimeKind.Utc);
-
-        return epoch;
-    }
 }

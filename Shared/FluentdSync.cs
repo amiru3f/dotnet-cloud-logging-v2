@@ -18,6 +18,18 @@ public static class FluentdSyncExtensions
     {
         return loggerSinkConfiguration.UDPSink($"udp://{ip}", port, new FluentdJsonFormatter(defaultTag));
     }
+
+    public static long ToEpochTime(this DateTimeOffset offset)
+    {
+        var utcDate = offset.ToUniversalTime();
+        long baseTicks = 621355968000000000;
+        long tickResolution = 10000000;
+        long epoch = (utcDate.Ticks - baseTicks) / tickResolution;
+        long epochTicks = (epoch * tickResolution) + baseTicks;
+        var date = new DateTime(epochTicks, DateTimeKind.Utc);
+
+        return epoch;
+    }
 }
 
 public class FluentdJsonFormatter : ITextFormatter
