@@ -1,8 +1,24 @@
+using Serilog;
+using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Elasticsearch;
+using Serilog.Sinks.Network;
 
 namespace Shared.Logging;
+
+public static class FluentdSyncExtensions
+{
+    public static LoggerConfiguration FluentdWithTCP(this LoggerSinkConfiguration loggerSinkConfiguration, string ip, int port, string defaultTag)
+    {
+        return loggerSinkConfiguration.TCPSink($"tcp://{ip}", port, new FluentdJsonFormatter(defaultTag));
+    }
+
+    public static LoggerConfiguration FluentdWithUDP(this LoggerSinkConfiguration loggerSinkConfiguration, string ip, int port, string defaultTag)
+    {
+        return loggerSinkConfiguration.UDPSink($"udp://{ip}", port, new FluentdJsonFormatter(defaultTag));
+    }
+}
 
 public class FluentdJsonFormatter : ITextFormatter
 {

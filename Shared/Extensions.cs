@@ -22,13 +22,8 @@ public static class Extensions
         loggerConfiguration.MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning);
         loggerConfiguration.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning);
 
-#if DEBUG
         loggerConfiguration
-        .MinimumLevel.Verbose().WriteTo.TCPSink("tcp://127.0.0.1", 24225, new FluentdJsonFormatter("UnTagged"));
-#else
-    loggerConfiguration
-    .MinimumLevel.Verbose().WriteTo.UDPSink("fluentd", 13000, new CompactJsonFormatter());
-#endif
+        .MinimumLevel.Verbose().WriteTo.FluentdWithTCP("127.0.0.1", 24225, "UnTagged");
     };
 
     public static long ToEpochTime(this DateTimeOffset offset)
