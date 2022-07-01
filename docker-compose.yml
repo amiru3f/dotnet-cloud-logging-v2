@@ -1,0 +1,76 @@
+version: '2'
+services:
+  # sender_worker: 
+  #      container_name: sender
+  #      build: 
+  #       context: ./
+  #       dockerfile: ./SenderWorker/Dockerfile
+  #      networks:
+  #       - efk_network
+  #      restart: always
+  #      depends_on:
+  #       - fluentd
+  #      command: sh -c './wait-for-it.sh http://elastic:9200/ -- dotnet SenderWorker.dll'
+  # receiver_worker: 
+  #      container_name: receiver
+  #      build: 
+  #       context: ./
+  #       dockerfile: ./ReceiverWorker/Dockerfile
+  #      networks:
+  #       - efk_network
+  #      restart: always
+  #      depends_on:
+  #       - fluentd
+  #      command: sh -c './wait-for-it.sh http://elastic:9200/ -- dotnet ReceiveWorker.dll'
+
+  fluentd:
+       container_name: fluentd
+       build: ./
+       volumes:
+           - ./fluent.conf:/fluentd/etc/fluent.conf
+       networks:
+        - efk_network
+       restart: always
+       depends_on:
+          - elastic
+       ports:
+        - "24225:24224"
+        - "24225:24224/udp"
+      
+############################# Elastic Search ###############################
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.2
+    healthcheck:
+        test: ["CMD", "telnet", "localhost:9200"]
+        interval: 30s
+        timeout: 120s
+        retries: 5
+    container_name: elastic
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    networks:
+      - efk_network
+    restart: always
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.2.2
+    container_name: kibana
+    healthcheck:
+        test: ["CMD", "curl", "localhost:5601/app/home"]
+        interval: 60s
+        timeout: 10s
+        retries: 5
+    depends_on:
+      - elastic
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elastic:9200/
+    networks:
+      - efk_network
+    restart: always
+networks:
+  efk_network:
